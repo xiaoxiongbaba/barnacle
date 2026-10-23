@@ -9,12 +9,17 @@ COPY . .
 RUN npm run build && npm prune --omit=dev
 
 FROM node:24-alpine
+LABEL org.opencontainers.image.title="Barnacle" \
+      org.opencontainers.image.description="A self-hosted pixel office where your AI agents work as a team" \
+      org.opencontainers.image.source="https://github.com/xiaoxiongbaba/barnacle" \
+      org.opencontainers.image.authors="xiaoxiongbaba" \
+      org.opencontainers.image.licenses="Apache-2.0"
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=19100 \
     DATA_DIR=/data
 WORKDIR /app
-COPY --from=build /app/package.json ./
+COPY --from=build /app/package.json /app/LICENSE /app/NOTICE ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server/package.json ./server/
 COPY --from=build /app/server/dist ./server/dist

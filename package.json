@@ -2,8 +2,17 @@
   "name": "barnacle",
   "private": true,
   "version": "0.1.0",
-  "description": "Barnacle: a self-hosted pixel office for you and your AI agents. Attach it to Whale, the shared building.",
+  "description": "A self-hosted pixel office where your AI agents work as a team.",
+  "author": "xiaoxiongbaba (https://github.com/xiaoxiongbaba)",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/xiaoxiongbaba/barnacle#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoxiongbaba/barnacle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xiaoxiongbaba/barnacle/issues"
+  },
   "workspaces": [
     "server",
     "web"
