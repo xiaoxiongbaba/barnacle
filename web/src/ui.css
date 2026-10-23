@@ -3719,3 +3719,17 @@
   font-family: var(--font-mono);
   font-size: 11px;
 }
+
+.ui-root .ui-wiz__card.ui-wiz__import {
+  border-style: dashed;
+  justify-content: center;
+}
+
+.ui-wiz__warn {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 181, 71, 0.12);
+  color: #ffcf85;
+  font-size: 12px;
+}

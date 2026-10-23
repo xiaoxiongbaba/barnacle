@@ -36,6 +36,21 @@ function avatar(seed: string, size = 26) {
   return img;
 }
 
+/** Downloads the current team as a file (members, souls, skills, scheduled work; no keys). Resolves with how many members. */
+export async function exportTeam(officeName: string): Promise<number> {
+  const team = await api<{ members: unknown[] }>("GET", "/api/company/export");
+  const blob = new Blob([`${JSON.stringify(team, null, 2)}\n`], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a");
+  a.href = url;
+  a.download = `${officeName.replace(/[\\/:*?"<>|]+/g, " ").trim() || "barnacle"}.barnacle-team.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return team.members.length;
+}
+
 const dayName = (d: number) => new Intl.DateTimeFormat(language(), { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 9, 25 + d)));
 
 export interface WizardContext {
@@ -63,6 +78,8 @@ export class Wizard {
   private modelNote = "";
   private options = { org: true, ceo: false, schedules: true };
   private result: { members: { id: string; name: string }[]; schedules: number } | null = null;
+  /** A team read from a file: the file as it was, and what the office made of it. */
+  private imported: { file: unknown; view: TemplateView; warnings: { kind: string; who: string; what: string }[] } | null = null;
 
   constructor(private ctx: WizardContext) {
     document.getElementById("wizard-close")?.addEventListener("click", () => this.close());
@@ -158,7 +175,7 @@ export class Wizard {
     this.render();
     try {
       this.result = await api("POST", "/api/company/setup", {
-        template: this.template,
+        ...(this.template === "file" && this.imported ? { team: this.imported.file } : { template: this.template }),
         language: language(),
         providerId: this.provider,
         model: this.model,
@@ -240,9 +257,41 @@ export class Wizard {
     return box;
   }
 
+  /** Reads a team file and asks the office what it would create. */
+  private async importFile(file: File) {
+    this.error = "";
+    try {
+      if (file.size > 2 * 1024 * 1024) throw new Error(t("team.tooBig"));
+      let data: unknown;
+      try {
+        data = JSON.parse(await file.text());
+      } catch {
+        throw new Error(t("team.notJson"));
+      }
+      const res = await api<{ preview: TemplateView; warnings: { kind: string; who: string; what: string }[] }>("POST", "/api/company/team-preview", { team: data });
+      this.imported = { file: data, view: { ...res.preview, name: res.preview.name || file.name.replace(/\.barnacle-team\.json$|\.json$/, "") }, warnings: res.warnings };
+      this.template = "file";
+      this.options.ceo = res.preview.members.some((m) => m.ceo);
+    } catch (err) {
+      this.error = `${t("team.importFailed")}：${(err as Error).message}`;
+    }
+    this.render();
+  }
+
   private stepTeam() {
     const grid = el("div", "ui-wiz__grid");
-    for (const tpl of this.templates) {
+    const all = this.imported ? [...this.templates, this.imported.view] : this.templates;
+    // A team someone exported (or you did, from another office).
+    const input = el("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.hidden = true;
+    input.addEventListener("change", () => input.files?.[0] && void this.importFile(input.files[0]));
+    const pick = el("button", "ui-wiz__card ui-wiz__import");
+    pick.type = "button";
+    pick.append(el("strong", "ui-wiz__name", `📂 ${t("team.import")}`), el("span", "ui-wiz__desc", t("team.importHelp")), input);
+    pick.addEventListener("click", (e) => e.target !== input && input.click());
+    for (const tpl of all) {
       const card = el("button", `ui-wiz__card${tpl.id === this.template ? " is-on" : ""}`);
       card.type = "button";
       card.addEventListener("click", () => {
@@ -269,9 +318,14 @@ export class Wizard {
           jobs.append(el("li", "", `${s.project ? "📋" : "⏰"} ${s.title} · ${when} ${s.rule.time ?? ""}`));
         }
         card.append(el("h5", "", t("wiz.members")), list, el("h5", "", t("wiz.schedules")), jobs, el("p", "ui-faint ui-small", t("wiz.runs", { n: String(tpl.runsPerDay) })));
+        if (tpl.id === "file" && this.imported) {
+          card.append(el("p", "ui-wiz__warn", `⚠️ ${t("team.trust")}`));
+          for (const w of this.imported.warnings) card.append(el("p", "ui-faint ui-small", `• ${t(`team.warn.${w.kind}`, { who: w.who, what: w.what })}`));
+        }
       }
       grid.append(card);
     }
+    grid.append(pick);
     return grid;
   }
 
@@ -338,7 +392,7 @@ export class Wizard {
 
   private stepConfirm() {
     const box = el("div", "ui-wiz__step");
-    const tpl = this.templates.find((x) => x.id === this.template);
+    const tpl = this.template === "file" ? this.imported?.view : this.templates.find((x) => x.id === this.template);
     const provider = this.providers.find((p) => p.id === this.provider);
     box.append(el("h4", "", `${this.name || this.ctx.officeName()} · ${tpl?.name ?? ""}`), el("p", "ui-faint", `${provider?.name ?? ""} · ${this.model}`));
     const check = (key: keyof Wizard["options"], label: string, disabled = false) => {

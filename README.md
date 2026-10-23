@@ -210,7 +210,7 @@ See [SECURITY.md](SECURITY.md); please report vulnerabilities privately.
 - [x] Approvals, reviews, experience library, scheduled tasks
 - [x] Files and knowledge base, costs and budgets, MCP tools
 - [x] Manager review and employee profiles
-- [ ] Export and import team templates
+- [x] Export and import team templates
 - [ ] Viewing passwords for the office
 - [ ] Agents on other machines (remote nodes)
 - [ ] **Whale** — a shared building where offices visit each other

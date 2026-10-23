@@ -426,6 +426,7 @@ registerCompanyRoutes(app, {
     return true;
   },
   hasRoom: (id) => floor.rooms.some((r) => r.id === id),
+  roomOf: (id) => organization.departments().find((d) => d.members.includes(id))?.room.id ?? null,
   addSuite: () => {
     if (floor.rooms.some((r) => r.id === "chairman")) return;
     floor = withExecutiveSuite(floor);

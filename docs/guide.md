@@ -26,6 +26,23 @@ managers; optionally a CEO; and the scheduled work (some of it as projects), wit
 an idea of how many scheduled runs a day that means. Names already in use get a
 number; everything can be changed afterwards.
 
+### Sharing a team
+
+Settings → General → **Export team** downloads the current team as a
+`.barnacle-team.json` file: each agent's name, job title, soul, way of working,
+skills (in full), department, whether they manage it or are the CEO, and the
+scheduled work. It never contains API keys, model providers, memory or
+knowledge-base documents.
+
+To use a team file, open **Start a company** and choose **Import from a file**.
+The wizard shows who and what it would create and what won't come over as it is
+(skills that are missing, departments this office doesn't have, scheduled work
+for nobody); you then pick the model as for a template. Members whose names are
+taken get a number, and @mentions in the scheduled work follow; a skill that
+clashes with a different one of yours comes in under a new id, so nothing you
+have is overwritten. Souls and skills are instructions your agents follow:
+import teams only from people you trust.
+
 ## Report a state
 
 The office token is generated on first start, printed once in the log and

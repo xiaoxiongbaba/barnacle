@@ -296,3 +296,54 @@ export function preview(t: Template, lang: TemplateLang) {
 }
 
 export const archetype = (key: string) => ARCHETYPES[key];
+
+// ---------------------------------------------------------------- team files (export / import)
+
+/** A team in one language: what a template becomes, and what a team file holds. */
+export interface TeamDef {
+  name: string;
+  description: string;
+  members: {
+    key: string;
+    name: string;
+    role: string;
+    soul: string;
+    instructions: string;
+    skills: string[];
+    /** A department (room id); imported teams fall back to a free desk if the office has no such room. */
+    room: string;
+    manager: boolean;
+    ceo: boolean;
+  }[];
+  /** The skills the members use, in full (created when missing). */
+  skills: { id: string; name: string; description: string; body: string }[];
+  schedules: { member: string; title: string; prompt: string; rule: ScheduleRule; project: boolean; projectBrief: string }[];
+}
+
+export function teamFromTemplate(t: Template, lang: TemplateLang): TeamDef {
+  const members = t.members.map((m) => {
+    const a = ARCHETYPES[m.archetype];
+    return { key: m.key, name: m.name, role: pick(a.role, lang), soul: pick(a.soul, lang), instructions: pick(a.instructions, lang), skills: a.skills, room: m.room, manager: !!m.manager, ceo: !!m.ceo };
+  });
+  const used = new Set(members.flatMap((m) => m.skills));
+  return {
+    name: pick(t.name, lang),
+    description: pick(t.description, lang),
+    members,
+    skills: TEMPLATE_SKILLS.filter((s) => used.has(s.id)),
+    schedules: t.schedules.map((s) => ({ member: s.member, title: pick(s.title, lang), prompt: pick(s.prompt, lang), rule: s.rule, project: !!s.project, projectBrief: "" })),
+  };
+}
+
+/** What a team would create: for the wizard's preview. */
+export function previewTeam(id: string, def: TeamDef) {
+  return {
+    id,
+    name: def.name,
+    description: def.description,
+    members: def.members.map((m) => ({ key: m.key, name: m.name, role: m.role, room: m.room, skills: m.skills, manager: m.manager, ceo: m.ceo })),
+    schedules: def.schedules.map((s) => ({ member: s.member, title: s.title, rule: s.rule, project: s.project })),
+    /** Model runs a day from the schedules alone (on a weekday), so you can judge the cost. */
+    runsPerDay: def.schedules.filter((s) => s.rule.type === "weekly" && s.rule.days.length >= 5).length,
+  };
+}

@@ -19,7 +19,7 @@ import { applyIcons, Panel } from "./panel";
 import { ProjectsList } from "./projects";
 import { ResultsBoard } from "./results";
 import { Headquarters } from "./org-ui";
-import { Wizard } from "./wizard";
+import { exportTeam, Wizard } from "./wizard";
 import { SettingsDialog } from "./settings";
 import type { Occupant, Office, OfficeEvent, ProjectSummary, ServerMessage } from "./types";
 
@@ -171,6 +171,13 @@ const wizard = new Wizard({
 $("open-wizard").addEventListener("click", () => {
   settings.close();
   void wizard.open();
+});
+$("export-team").addEventListener("click", () => {
+  const status = $("export-status");
+  status.textContent = "";
+  exportTeam(office?.name ?? "barnacle")
+    .then((n) => (status.textContent = t("team.exported", { n: String(n) })))
+    .catch((err: Error) => (status.textContent = t("common.failed", { error: err.message })));
 });
 
 const results = new ResultsBoard({
