@@ -181,7 +181,13 @@ export function registerGovernanceRoutes(app: FastifyInstance, deps: Deps) {
     const unique = sources(task).filter((s) => !seen.has(s.url) && seen.add(s.url));
     const redoneBy = store.deliveries({ status: "all", occupantId: task.occupantId, limit: 1000 }).find((t) => t.redoOf === task.id)?.id ?? null;
     const helpers = store.childTasks(task.id).map((c) => ({ id: c.id, occupantId: c.occupantId, kind: c.kind, title: c.title, status: c.status }));
-    return { task, sources: unique, redoneBy, helpers };
+    // Earlier versions and who sent them back (the manager, or you), oldest first.
+    const rounds: { id: number; by: "manager" | "you"; note: string; managerId: string | null }[] = [];
+    for (let t = task.redoOf === null ? undefined : store.task(task.redoOf); t && rounds.length < 10; t = t.redoOf === null ? undefined : store.task(t.redoOf)) {
+      if (t.managerReview === "failed") rounds.unshift({ id: t.id, by: "manager", note: t.managerNote, managerId: t.managerId });
+      else if (t.review === "rejected") rounds.unshift({ id: t.id, by: "you", note: t.reviewNote, managerId: null });
+    }
+    return { task, sources: unique, redoneBy, helpers, rounds };
   });
 
   /** For the badge and the "finished" toast: how many wait for checking, and the newest. */

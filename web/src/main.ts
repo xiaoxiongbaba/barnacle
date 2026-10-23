@@ -64,6 +64,7 @@ const panel = new Panel({
 });
 const drawer = new Drawer({
   nameOf: (id) => occupants.get(id)?.name ?? id,
+  openResult: (id) => void results.open(id),
   agents: () => sorted().filter((o) => o.kind === "agent" && o.model),
   waiting: () => sorted().filter((o) => o.state === "waiting"),
   isChairman: (id) => !!office?.org?.enabled && office.org.chairman === id,

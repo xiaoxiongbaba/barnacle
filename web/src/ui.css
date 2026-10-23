@@ -3565,3 +3565,157 @@
 .ui-taskcost {
   margin: 6px 0 0;
 }
+
+/* ---------------------------------------------------------------- manager checks and profiles */
+
+.ui-results__check {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 10px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(79, 209, 139, 0.35);
+  background: rgba(79, 209, 139, 0.08);
+  font-size: 13px;
+}
+
+.ui-results__rounds {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.ui-profile__tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.ui-profile__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-bg-soft);
+}
+
+.ui-profile__tile strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-profile__tile span {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+
+.ui-profile__tile.is-good {
+  border-color: rgba(79, 209, 139, 0.45);
+}
+
+.ui-profile__tile.is-warn {
+  border-color: rgba(255, 181, 71, 0.45);
+}
+
+.ui-profile__tile.is-bad {
+  border-color: rgba(255, 107, 107, 0.5);
+}
+
+.ui-profile__h {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  font-weight: 600;
+}
+
+.ui-profile__skills,
+.ui-profile__reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.ui-profile__skills li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ui-profile__reasons li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+}
+
+.ui-team {
+  margin-top: 16px;
+}
+
+.ui-team__wrap {
+  overflow-x: auto;
+}
+
+.ui-team__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ui-team__table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ui-muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--ui-line-strong);
+  white-space: nowrap;
+}
+
+.ui-team__table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--ui-line);
+  vertical-align: top;
+}
+
+.ui-team__table td small {
+  display: block;
+}
+
+.ui-team__table tr:not(:first-child) {
+  cursor: pointer;
+}
+
+.ui-team__table tr:not(:first-child):hover {
+  background: var(--ui-bg-hover);
+}
+
+.ui-team__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-team__num.is-good {
+  color: #7fe3ad;
+}
+
+.ui-team__num.is-bad {
+  color: #ff9a9a;
+}
+
+.ui-team__model {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}

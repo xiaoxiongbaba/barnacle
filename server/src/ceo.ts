@@ -51,6 +51,8 @@ export interface CeoDeps {
 }
 
 export class Ceo {
+  /** Someone's track record (see profiles.ts), to judge what they ask for. */
+  profileLine: ((occupantId: string) => string) | null = null;
   /** A line on what the company spent in a period (see costs.ts). */
   spendLine: ((scope: string, since: string, until: string) => string | null) | null = null;
   /** Decisions are taken one at a time. */
@@ -136,6 +138,7 @@ export class Ceo {
     const input = [
       `Category: ${item.category}`,
       `Asked by: ${requester}`,
+      item.requester && this.profileLine ? this.profileLine(item.requester) : "",
       `What waits for a decision:\n${clip(item.detail, 6000)}`,
       `The chairman's earlier decisions on this kind of thing (your precedents, newest first):\n${precedents.map((p) => `#${p.id} ${p.decision.toUpperCase()}${p.overrules ? " (overruling the CEO)" : ""}: ${p.summary}${p.reason ? ` — reason: ${p.reason}` : ""}`).join("\n")}`,
       lessons.length ? `From the team's experience library:\n${lessons.map((e) => `- ${e.title}: ${clip(e.applicability, 200)}`).join("\n")}` : "",

@@ -804,3 +804,12 @@ textarea.mono {
   width: 100%;
   margin-bottom: 4px;
 }
+
+#tab-org label.org-review {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+}

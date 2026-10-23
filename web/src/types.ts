@@ -32,6 +32,10 @@ export interface Task {
   reviewNote: string;
   /** The task this one redoes. */
   redoOf: number | null;
+  /** The department manager's check before it reaches you. */
+  managerReview: "pending" | "passed" | "failed" | null;
+  managerNote: string;
+  managerId: string | null;
   parentTaskId: number | null;
   requestedBy: string | null;
   depth: number;
@@ -145,6 +149,7 @@ export interface OrgSettings extends OrgRoles {
   ceo: string | null;
   delegation: Record<string, { enabled: boolean; dailyLimit: number }>;
   highRisk: string[];
+  managerReview: Record<string, boolean>;
 }
 
 /** A decision on something that waited for you: by you, or by the CEO for you. */

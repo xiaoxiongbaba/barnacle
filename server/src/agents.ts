@@ -365,8 +365,8 @@ export class TaskRunner {
       }
     }, 5000);
     const steps: TaskStep[] = [];
-    const step = (kind: TaskStep["kind"], text: string, state: State, ref?: TaskStep["ref"], url?: string) => {
-      steps.push({ kind, text, at: new Date().toISOString(), ...(ref ? { ref } : {}), ...(url ? { url } : {}) });
+    const step = (kind: TaskStep["kind"], text: string, state: State, ref?: TaskStep["ref"], url?: string, skill?: string) => {
+      steps.push({ kind, text, at: new Date().toISOString(), ...(ref ? { ref } : {}), ...(url ? { url } : {}), ...(skill ? { skill } : {}) });
       const t = store.updateTask(task.id, { steps });
       if (t) notify(t);
       shown = { state, detail: text };
@@ -499,7 +499,10 @@ export class TaskRunner {
           else if (name.startsWith("mcp__")) step("mcp", say("mcp", name.replace(/^mcp__/, "").replace("__", " → ")), "researching");
           else if (name === "write_file") step("file", say("file", String(input.name ?? "")), "writing");
           else if (name === "read_file") step("fetch", say("readFile", `#${String(input.file_id ?? "")}`), "researching");
-          else if (name === "read_skill") step("skill", say("skill", String(input.name ?? "")), "researching");
+          else if (name === "read_skill") {
+            const skill = profile.skills.find((s) => s.name === input.name || s.id === input.name);
+            step("skill", say("skill", String(input.name ?? "")), "researching", undefined, undefined, skill?.id);
+          }
           else if (name === "web_search") step("search", say("search", String(input.query ?? "")), "researching");
           else if (name === "web_fetch") {
             let host = String(input.url ?? "");

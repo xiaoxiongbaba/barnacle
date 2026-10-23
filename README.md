@@ -209,7 +209,7 @@ See [SECURITY.md](SECURITY.md); please report vulnerabilities privately.
 - [x] Delegation, project threads, departments, managers, CEO, chairman's desk
 - [x] Approvals, reviews, experience library, scheduled tasks
 - [x] Files and knowledge base, costs and budgets, MCP tools
-- [ ] Manager review and employee profiles
+- [x] Manager review and employee profiles
 - [ ] Export and import team templates
 - [ ] Viewing passwords for the office
 - [ ] Agents on other machines (remote nodes)

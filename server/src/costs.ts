@@ -169,6 +169,12 @@ export class Costs {
     return { en: `💸 Model spending this period: ${cost} (${n} calls)${month}`, ja: `💸 今期のモデル費用：${cost}（${n} 回）${month}`, "zh-Hant": `💸 本期模型花費：${cost}（${n} 次呼叫）${month}` }[lang];
   }
 
+  /** What someone's calls cost since a time. */
+  personSpend(occupantId: string, since: Date): number {
+    const r = this.deps.store.sql.prepare("SELECT COALESCE(SUM(cost), 0) AS cost FROM usage WHERE occupant_id = ? AND at >= ?").get(occupantId, since.toISOString()) as { cost: number };
+    return Number(r.cost);
+  }
+
   /** What a task cost, with the colleagues it asked. */
   taskSpend(task: Task, depth = 0): Spend {
     const r = this.deps.store.sql

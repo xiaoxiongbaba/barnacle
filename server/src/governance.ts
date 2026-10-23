@@ -114,17 +114,22 @@ export class Governance {
     const finished = deps.tasks.hooks.finished;
     deps.tasks.hooks.finished = (task) => {
       finished?.(task);
-      if (task.kind === "task" && task.scheduleId !== null && task.status === "done" && !task.review) {
-        this.onPending?.({
-          category: "delivery",
-          refType: "task",
-          refId: String(task.id),
-          summary: task.title,
-          requester: task.occupantId,
-          detail: `Scheduled task: ${task.title}\n\nWhat was asked:\n${clip(task.prompt, 1500)}\n\nThe delivery:\n${clip(task.result, 4000)}`,
-        });
-      }
+      // Work with the department manager comes here once they pass it (see quality.ts).
+      if (task.managerReview !== "pending") this.offerDelivery(task);
     };
+  }
+
+  /** A finished scheduled task is a routine delivery: the CEO may accept it for you, if you delegated that. */
+  offerDelivery(task: Task) {
+    if (task.kind !== "task" || task.scheduleId === null || task.status !== "done" || task.review) return;
+    this.onPending?.({
+      category: "delivery",
+      refType: "task",
+      refId: String(task.id),
+      summary: task.title,
+      requester: task.occupantId,
+      detail: `Scheduled task: ${task.title}\n\nWhat was asked:\n${clip(task.prompt, 1500)}\n\nThe delivery:\n${clip(task.result, 4000)}${task.managerNote ? `\n\nThe department manager's check: ${task.managerNote}` : ""}`,
+    });
   }
 
   rule(action: string): Rule {
@@ -268,8 +273,17 @@ export class Governance {
     this.log({ category: "delivery", refType: "task", refId: String(taskId), summary: task.title, decision: verdict === "accepted" ? "approve" : "deny", reason: note }, meta);
     this.changed();
     if (verdict === "accepted") return { task: reviewed };
-    const lesson = clip(`My manager sent back “${task.title}”: ${note || "not good enough"}`, 380);
-    if (fits(store.memories(task.occupantId), "memory", lesson)) store.addMemory(task.occupantId, "memory", lesson, "agent");
+    return { task: reviewed, redo: this.redo(task, note, `My manager sent back “${task.title}”: ${note || "not good enough"}`) };
+  }
+
+  /**
+   * Gives a task to its agent again, with its previous delivery and why it was sent back; the reason goes
+   * into the agent's memory (so it learns).
+   */
+  redo(task: Task, note: string, lesson: string): Task {
+    const { store, tasks } = this.deps;
+    const memo = clip(lesson, 380);
+    if (fits(store.memories(task.occupantId), "memory", memo)) store.addMemory(task.occupantId, "memory", memo, "agent");
     const prompt = [
       task.prompt,
       "",
@@ -284,7 +298,7 @@ export class Governance {
     ].join("\n");
     const redo = store.addTask(task.occupantId, clip(`↩ ${task.title.replace(/^↩ /, "")}`, 80), prompt, { redoOf: task.id, scheduleId: task.scheduleId });
     tasks.wake(redo);
-    return { task: reviewed, redo };
+    return redo;
   }
 
   /** Tools every task gets: the experience library, and proposing skills. */

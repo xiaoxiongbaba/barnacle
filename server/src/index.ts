@@ -1,3 +1,5 @@
+import { Quality } from "./quality.js";
+import { Profiles } from "./profiles.js";
 import { timingSafeEqual } from "node:crypto";
 import { existsSync } from "node:fs";
 import fastifyStatic from "@fastify/static";
@@ -327,6 +329,16 @@ const ceo = new Ceo({
   log: (message) => app.log.warn(message),
 });
 organization.ceo = ceo;
+const quality = new Quality({
+  store,
+  tasks,
+  governance: governance!,
+  org: () => settings.org,
+  departmentOf: (id) => organization.departments().find((d) => d.members.includes(id)) ?? null,
+  publish,
+  handoff: (h) => broadcast({ type: "handoff", ...h }),
+  log: (message) => app.log.warn(message),
+});
 
 const roomName = (id: string) => (id === "company" ? "Company" : (floor.rooms.find((r) => r.id === id)?.name ?? id));
 let costsTimer: NodeJS.Timeout | null = null;
@@ -348,6 +360,17 @@ const costs = new Costs({
   },
 });
 tasks.hooks.budget = (task, ctx, starting) => costs.check(task, ctx, starting);
+const profiles = new Profiles({
+  store,
+  spent: (id, since) => costs.personSpend(id, since),
+  roomOf: (id) => organization.departments().find((d) => d.members.includes(id))?.room.id ?? null,
+});
+ceo.profileLine = (id) => profiles.summary(id);
+app.get("/api/occupants/:id/profile", { preHandler: requireToken }, async (req, reply) => {
+  const p = profiles.profile((req.params as { id: string }).id);
+  return p ?? reply.code(404).send({ error: "no such occupant" });
+});
+app.get("/api/profiles", { preHandler: requireToken }, async () => ({ profiles: profiles.all() }));
 tasks.hooks.model = (task, brain) => (brain.lightModel && costs.light(task) ? brain.lightModel : brain.model);
 organization.spendLine = (scope, since, until) => costs.spendLine(scope, since, until);
 ceo.spendLine = (scope, since, until) => costs.spendLine(scope, since, until);
@@ -429,6 +452,7 @@ registerMcpRoutes(app, { mcp, requireToken });
 registerFileRoutes(app, { store, library, requireToken, departments });
 registerAiRoutes(app, { store, requireToken, parseId, publish, publishOccupant, officeName: () => settings.officeName, tasks, scheduler, attach: (taskId, ids) => library.attach(taskId, ids) });
 tasks.resume();
+quality.resume();
 syncDesks();
 scheduler.start();
 mcp.start();

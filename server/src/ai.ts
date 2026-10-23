@@ -36,7 +36,7 @@ export interface Usage {
 export interface UsageTag {
   occupantId: string | null;
   taskId?: number | null;
-  kind: "task" | "chat" | "report" | "ceo" | "planner" | "summary";
+  kind: "task" | "chat" | "report" | "ceo" | "planner" | "summary" | "review";
 }
 
 let usageListener: ((model: string, tag: UsageTag, usage: Usage) => void) | null = null;

@@ -9,7 +9,8 @@ the [README](../README.md).
 - [Settings](#settings)
 - [Floor plan](#floor-plan)
 - [AI models](#ai-models) — memory, working together, MCP tools, costs, files,
-  projects, the organization, keeping agents in check, scheduled tasks
+  projects, the organization, manager review and profiles, keeping agents in
+  check, scheduled tasks
 - [Environment variables](#environment-variables)
 - [Art packs](#art-packs)
 
@@ -253,6 +254,25 @@ Its decisions, reasons and the precedents they followed are listed at your desk,
 and you can overrule any of them: what can be undone is undone (an experience
 entry, a skill change, an accepted delivery), and your decision becomes the new
 precedent.
+
+### Manager review and employee profiles
+
+- **Manager checks first** (Settings → Organization, per department, once the
+  department has a manager): when a member finishes a task, the manager reads it
+  before it reaches you — what was asked, the delivery and the pages it read.
+  Work that passes lands in your results with the manager's note on top; work
+  with a real problem (not what was asked, incomplete, made-up facts or no
+  sources, wrong language) goes straight back for a redo, and the reason goes
+  into the member's memory. After two rounds sent back it comes to you anyway,
+  with what is still wrong. The results page lists the earlier versions and why
+  each was sent back. Scheduled deliveries go to the CEO only after the manager
+  passes them.
+- **Employee profiles**: open someone's workstation for their record over the
+  last 90 days — acceptance and first-try rate, how often you and their manager
+  sent work back and why, cost, average time, the skills they use and how that
+  work was received, colleagues helped and project turns. The chairman's desk
+  has the whole team in one table, lowest acceptance first, to see whose model
+  or job to change. The CEO reads the requester's record when it decides for you.
 
 ### Keeping agents in check
 

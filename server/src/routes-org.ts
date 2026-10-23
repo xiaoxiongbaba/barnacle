@@ -32,6 +32,7 @@ const orgBody = z.object({
   ceo: z.string().max(40).nullable().optional(),
   delegation: z.record(z.string().max(60), z.object({ enabled: z.boolean(), dailyLimit: z.number().int().min(1).max(200).default(10) })).optional(),
   highRisk: z.array(z.string().max(60)).optional(),
+  managerReview: z.record(z.string().max(40), z.boolean()).optional(),
 });
 
 const overruleBody = z.object({ note: z.string().trim().max(1000).default("") });

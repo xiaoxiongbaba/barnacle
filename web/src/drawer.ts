@@ -1,3 +1,4 @@
+import { profileCard, type Profile } from "./profile-ui";
 import { taskCost } from "./costs-ui";
 import { soulEditor, type Skill } from "./agent-editor";
 import { api, tokenStore, Unauthorized } from "./auth";
@@ -146,6 +147,8 @@ export class Drawer {
   private timer: number | null = null;
   /** Memory: null until loaded, "locked" without the token. */
   private memory: MemoryView | "locked" | null = null;
+  /** The open agent's record (shown in the workstation). */
+  private profile: { id: string; data: Profile | null } | null = null;
   private memDraft = { memory: "", user: "" };
   private memEdit: { id: number; text: string } | null = null;
   private memError = "";
@@ -230,6 +233,8 @@ export class Drawer {
       onToggle: (open: boolean) => void;
       unlock: () => Promise<void>;
       onSoul: (id: string) => void;
+      /** Opens a delivery in the results page. */
+      openResult: (taskId: number) => void;
     },
   ) {
     const close = $("drawer-close");
@@ -644,6 +649,7 @@ export class Drawer {
     if (o.model) button(t("chat.open"), () => this.opts.onChat(o.id));
     if (o.kind === "agent") button(this.bench ? t("bench.more") : t("desk.bench"), () => {
       this.bench = !this.bench;
+      if (this.bench) this.profile = null;
       this.render();
     });
     status.append(label, actions);
@@ -658,7 +664,7 @@ export class Drawer {
     now.append(box);
     view.append(now);
 
-    if (o.kind === "agent" && this.bench) view.append(this.benchSection(o));
+    if (o.kind === "agent" && this.bench) view.append(this.benchSection(o), this.profileSection(o));
     else if (o.kind === "agent") view.append(this.workSection(o), this.scheduleSection(o), this.memorySection(o));
 
     // Timeline from the office's events.
@@ -686,6 +692,26 @@ export class Drawer {
       next?.focus({ preventScroll: true });
       if (next && focus.start !== null) next.setSelectionRange(focus.start, focus.end);
     }
+  }
+
+  /** The employee profile: how their work has gone (loaded when the workstation opens). */
+  private profileSection(o: Occupant) {
+    const sec = section(t("profile.title"));
+    if (this.profile?.id !== o.id) {
+      this.profile = { id: o.id, data: null };
+      void api<Profile>("GET", `/api/occupants/${encodeURIComponent(o.id)}/profile`)
+        .then((p) => {
+          if (this.profile?.id === o.id) {
+            this.profile.data = p;
+            this.render();
+          }
+        })
+        .catch(() => {});
+    }
+    const p = this.profile.data;
+    if (!p) sec.append(el("p", "ui-faint ui-small", tokenStore.get() ? t("drawer.loading") : t("drawer.unlockToGive")));
+    else sec.append(profileCard(p, { openResult: (id) => this.opts.openResult(id) }));
+    return sec;
   }
 
   /**
@@ -1164,7 +1190,8 @@ export class Drawer {
     head.type = "button";
     const when = task.finishedAt ?? task.startedAt ?? task.createdAt;
     const badge = task.kind === "ask" ? "🙋 " : task.kind === "delegate" ? "🤝 " : task.kind === "project" ? "📋 " : task.scheduleId !== null ? "⏰ " : "";
-    head.append(el("span", "ui-taskcard__icon", TASK_ICON[task.status]), el("span", "ui-taskcard__title", `${badge}${task.title}`), el("span", "ui-taskcard__time", `${t(`task.${task.status}`)} · ${relativeTime(Date.parse(when))}`));
+    const checked = task.managerReview ? ` · ${t(`quality.state.${task.managerReview}`)}` : "";
+    head.append(el("span", "ui-taskcard__icon", TASK_ICON[task.status]), el("span", "ui-taskcard__title", `${badge}${task.title}`), el("span", "ui-taskcard__time", `${t(`task.${task.status}`)}${checked} · ${relativeTime(Date.parse(when))}`));
     head.addEventListener("click", () => {
       this.openTask = this.openTask === task.id ? null : task.id;
       this.render();

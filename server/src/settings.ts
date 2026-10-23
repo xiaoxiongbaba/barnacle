@@ -51,6 +51,8 @@ export const settingsSchema = z.object({
       delegation: z.record(z.string().max(60), z.object({ enabled: z.boolean(), dailyLimit: z.number().int().min(1).max(200).default(10) })).default({}),
       /** Categories that always come to you, whatever is delegated. */
       highRisk: z.array(z.string().max(60)).default([]),
+      /** room id → the manager checks members' deliveries before they reach you (see quality.ts). */
+      managerReview: z.record(z.string().max(40), z.boolean()).default({}),
     })
     .default({
       enabled: false,
@@ -64,6 +66,7 @@ export const settingsSchema = z.object({
       ceo: null,
       delegation: {},
       highRisk: [],
+      managerReview: {},
     }),
   /** What models cost and what the company may spend (see costs.ts). */
   costs: z
@@ -138,7 +141,7 @@ export function defaultSettings(): Settings {
     stateTtlSeconds: config.defaults.stateTtlSeconds,
     offlineAfterSeconds: config.defaults.offlineAfterSeconds,
     toolPolicy: {},
-    org: { enabled: false, chairman: null, managers: {}, reportTime: "18:00", reportDays: [1, 2, 3, 4, 5], timeZone: "UTC", language: "en", lastReportAt: null, ceo: null, delegation: {}, highRisk: [] },
+    org: { enabled: false, chairman: null, managers: {}, reportTime: "18:00", reportDays: [1, 2, 3, 4, 5], timeZone: "UTC", language: "en", lastReportAt: null, ceo: null, delegation: {}, highRisk: [], managerReview: {} },
     costs: structuredClone(DEFAULT_COSTS) as unknown as Settings["costs"],
   };
 }

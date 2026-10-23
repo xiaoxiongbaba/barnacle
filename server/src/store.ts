@@ -105,6 +105,8 @@ export interface TaskStep {
   ref?: { occupantId: string; taskId: number };
   /** The page it read (so you can check its sources). */
   url?: string;
+  /** The skill it used (for the member's profile). */
+  skill?: string;
 }
 
 /** task: given by you or a schedule; ask / delegate: a colleague's request (a sub-task); project: a turn in a project thread. */
@@ -134,6 +136,10 @@ export interface Task {
   reviewNote: string;
   /** The task this one redoes. */
   redoOf: number | null;
+  /** The department manager's check before it reaches you: waiting, passed, or sent back for a redo. */
+  managerReview: "pending" | "passed" | "failed" | null;
+  managerNote: string;
+  managerId: string | null;
   createdAt: string;
   startedAt: string | null;
   finishedAt: string | null;
@@ -157,6 +163,9 @@ interface TaskRow {
   review: "accepted" | "rejected" | null;
   review_note: string | null;
   redo_of: number | null;
+  manager_review?: "pending" | "passed" | "failed" | null;
+  manager_note?: string | null;
+  manager_id?: string | null;
   created_at: string;
   started_at: string | null;
   finished_at: string | null;
@@ -180,6 +189,9 @@ const toTask = (r: TaskRow): Task => ({
   review: r.review ?? null,
   reviewNote: r.review_note ?? "",
   redoOf: r.redo_of ?? null,
+  managerReview: r.manager_review ?? null,
+  managerNote: r.manager_note ?? "",
+  managerId: r.manager_id ?? null,
   createdAt: r.created_at,
   startedAt: r.started_at,
   finishedAt: r.finished_at,
@@ -721,6 +733,13 @@ export class Store {
         ALTER TABLE tasks ADD COLUMN redo_of INTEGER;
       `);
     }
+    if (!columns("tasks").includes("manager_review")) {
+      this.db.exec(`
+        ALTER TABLE tasks ADD COLUMN manager_review TEXT;
+        ALTER TABLE tasks ADD COLUMN manager_note TEXT;
+        ALTER TABLE tasks ADD COLUMN manager_id TEXT;
+      `);
+    }
     if (!columns("brains").includes("light_model")) this.db.exec("ALTER TABLE brains ADD COLUMN light_model TEXT");
     if (!columns("skills").includes("edited_by_you")) this.db.exec("ALTER TABLE skills ADD COLUMN edited_by_you INTEGER NOT NULL DEFAULT 0");
     if (!columns("schedules").includes("project_title")) {
@@ -1028,6 +1047,12 @@ export class Store {
     this.db.prepare("UPDATE tasks SET review = NULL, review_note = NULL WHERE id = ?").run(id);
   }
 
+  /** The department manager's check (see quality.ts). */
+  setManagerReview(id: number, state: "pending" | "passed" | "failed", managerId: string, note = "") {
+    this.db.prepare("UPDATE tasks SET manager_review = ?, manager_id = ?, manager_note = ? WHERE id = ?").run(state, managerId, note, id);
+    return this.task(id);
+  }
+
   reviewTask(id: number, review: "accepted" | "rejected", note: string) {
     this.db.prepare("UPDATE tasks SET review = ?, review_note = ? WHERE id = ?").run(review, note, id);
     return this.task(id);
@@ -1038,7 +1063,8 @@ export class Store {
    * newest first. "pending": done and not yet accepted or sent back.
    */
   deliveries(filter: { status?: "pending" | "accepted" | "rejected" | "failed" | "all"; occupantId?: string; limit?: number } = {}): Task[] {
-    const where = ["kind = 'task'"];
+    // Work still with the department manager, or sent back by them, isn't yours to check yet.
+    const where = ["kind = 'task'", "(manager_review IS NULL OR manager_review = 'passed')"];
     const args: (string | number)[] = [];
     switch (filter.status ?? "all") {
       case "pending":

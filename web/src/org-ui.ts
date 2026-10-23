@@ -1,3 +1,4 @@
+import { teamTable, type Profile } from "./profile-ui";
 import { costPanel, type CostData } from "./costs-ui";
 import { api, tokenStore, Unauthorized } from "./auth";
 import { characterSeed } from "./floor/art-habblaud";
@@ -194,7 +195,19 @@ export class OrgTab {
       const row = el("div", "occupant-row");
       const info = el("div", "occupant-info");
       info.append(el("strong", "", d.name), el("small", "help", t("org.members", { n: String(d.members.length) })));
-      row.append(info, select);
+      // The manager checks members' work before it reaches you.
+      const review = el("label", "check org-review");
+      const box = el("input");
+      box.type = "checkbox";
+      box.checked = !!org.managerReview?.[d.id];
+      box.disabled = !org.managers[d.id];
+      box.title = t("org.reviewHelp");
+      box.addEventListener("change", () => {
+        org.managerReview = { ...(org.managerReview ?? {}), [d.id]: box.checked };
+        void this.save({ managerReview: org.managerReview }, status);
+      });
+      review.append(box, el("span", "", t("org.review")));
+      row.append(info, select, review);
       li.append(row);
       list.append(li);
     }
@@ -233,7 +246,7 @@ export class OrgTab {
     this.root.replaceChildren(
       el("p", "help", t("org.intro")),
       enabled,
-      ...(org.enabled ? [chairRow, ceoRow, suite, el("h4", "", t("org.departments")), list, timeRow, daysRow, delegation, el("div", "row")] : []),
+      ...(org.enabled ? [chairRow, ceoRow, suite, el("h4", "", t("org.departments")), el("small", "help", t("org.reviewIntro")), list, timeRow, daysRow, delegation, el("div", "row")] : []),
       el("div", "row"),
     );
     const last = this.root.lastElementChild!;
@@ -259,6 +272,7 @@ export class Headquarters {
   private dialog = document.getElementById("hq") as HTMLDialogElement;
   private data: Dashboard | null = null;
   private costs: CostData | null = null;
+  private team: Profile[] | null = null;
   private inbox: Inbox | null = null;
   private history: { room: DepartmentView; reports: Report[]; selected: number | null } | null = null;
   private assigning: { room: string; text: string; note: string } | null = null;
@@ -311,11 +325,13 @@ export class Headquarters {
 
   private async load() {
     try {
-      const [data, inbox, costs] = await Promise.all([
+      const [data, inbox, costs, team] = await Promise.all([
         api<Dashboard>("GET", "/api/org/dashboard"),
         api<Inbox>("GET", "/api/inbox"),
         api<CostData>("GET", "/api/costs?days=14").catch(() => null),
+        api<{ profiles: Profile[] }>("GET", "/api/profiles").catch(() => null),
       ]);
+      this.team = team?.profiles ?? null;
       this.data = data;
       this.inbox = inbox;
       this.costs = costs;
@@ -411,6 +427,17 @@ export class Headquarters {
     if (d.org.ceo) right.append(this.decisions(d.decisions));
     columns.append(left, right);
     view.append(columns);
+    if (this.team) {
+      view.append(
+        teamTable(this.team, {
+          roomName: (id) => d.departments.find((x) => x.id === id)?.name ?? id,
+          openAgent: (id) => {
+            this.dialog.close();
+            this.ctx.openAgent(id);
+          },
+        }),
+      );
+    }
     if (this.error) view.append(el("p", "ui-error ui-small", this.error));
     body.replaceChildren(view);
     body.scrollTop = scroll;

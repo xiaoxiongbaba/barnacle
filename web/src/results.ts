@@ -35,6 +35,8 @@ interface Detail {
   sources: { url: string; by: string }[];
   redoneBy: number | null;
   helpers: { id: number; occupantId: string; kind: string; title: string; status: string }[];
+  /** Earlier versions, and who sent each back. */
+  rounds?: { id: number; by: "manager" | "you"; note: string; managerId: string | null }[];
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = "", text?: string) {
@@ -335,6 +337,33 @@ export class ResultsBoard {
     const asked = el("details", "ui-proj__fold");
     asked.append(el("summary", "", t("results.asked")), el("p", "ui-taskcard__prompt", task.prompt.split("\n---\n")[0]));
     view.append(asked);
+
+    // The department manager's check, and the versions sent back before this one.
+    if (task.managerReview === "passed" && task.managerId) {
+      const check = el("div", "ui-results__check");
+      check.append(avatar(task.managerId, 20), el("strong", "", t("quality.checkedBy", { name: this.ctx.nameOf(task.managerId) })), el("span", "", task.managerNote));
+      view.append(check);
+    }
+    if (d.rounds?.length) {
+      const rounds = el("details", "ui-proj__fold");
+      rounds.append(el("summary", "", t("quality.rounds", { n: String(d.rounds.length) })));
+      const ul = el("ul", "ui-results__rounds");
+      d.rounds.forEach((r, i) => {
+        const li = el("li");
+        const open = el("button", "ui-proj__name", t("quality.version", { n: String(i + 1) }));
+        open.type = "button";
+        open.addEventListener("click", () => {
+          this.status = "all";
+          this.selected = r.id;
+          void this.load();
+        });
+        const who = r.by === "manager" ? t("quality.sentBackBy", { name: this.ctx.nameOf(r.managerId ?? "") }) : t("quality.sentBackByYou");
+        li.append(open, el("span", "ui-faint", ` · ${who}：`), el("span", "", r.note || "—"));
+        ul.append(li);
+      });
+      rounds.append(ul);
+      view.append(rounds);
+    }
 
     // The result, with what to do about it.
     if (task.status === "failed") view.append(el("p", "ui-error", `${t("task.failed")}: ${task.error}`));
