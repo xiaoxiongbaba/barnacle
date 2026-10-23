@@ -1,0 +1,16 @@
+services:
+  barnacle:
+    build: .
+    image: barnacle:local
+    container_name: barnacle
+    restart: unless-stopped
+    ports:
+      - "19100:19100"
+    environment:
+      BARNACLE_NAME: "My Barnacle"
+      # BARNACLE_TOKEN: set your own (min 32 chars), or read the generated one from the logs
+    volumes:
+      - barnacle-data:/data
+
+volumes:
+  barnacle-data:

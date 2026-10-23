@@ -1,0 +1,24 @@
+{
+  "room": "standard",
+  "tile": 32,
+  "width": 960,
+  "height": 544,
+  "areas": {
+    "lounge":  { "label": "Lounge",      "theme": "lounge",  "x": 32,  "y": 80,  "w": 288, "h": 208 },
+    "desks":   { "label": "Desks",       "theme": "desks",   "x": 352, "y": 80,  "w": 320, "h": 208 },
+    "library": { "label": "Library",     "theme": "library", "x": 704, "y": 80,  "w": 224, "h": 208 },
+    "door":    { "label": "Door",        "theme": "door",    "x": 32,  "y": 336, "w": 160, "h": 176 },
+    "bug":     { "label": "Bug corner",  "theme": "bug",     "x": 352, "y": 336, "w": 224, "h": 176 },
+    "servers": { "label": "Server room", "theme": "servers", "x": 608, "y": 336, "w": 320, "h": 176 }
+  },
+  "stateAreas": {
+    "idle": "lounge",
+    "writing": "desks",
+    "researching": "library",
+    "executing": "servers",
+    "syncing": "servers",
+    "waiting": "desks",
+    "error": "bug",
+    "offline": "door"
+  }
+}

@@ -1,0 +1,39 @@
+Barnacle
+Copyright 2026 The Barnacle Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+-------------------------------------------------------------------------------
+Third-party software included in this repository
+-------------------------------------------------------------------------------
+
+Habblaud (https://github.com/marmottajr/habblaud)
+  Copyright (c) 2026 Márcio Junior
+  MIT License — see web/src/vendor/habblaud/LICENSE
+  Vendored in web/src/vendor/habblaud/: the built-in pixel art (characters,
+  furniture, floors, walls, outdoor scenery, icons), all drawn in code. The page
+  layout and styles in web/src/ui.css follow it.
+
+-------------------------------------------------------------------------------
+Third-party software used at build or run time (installed from npm, not included)
+-------------------------------------------------------------------------------
+
+Phaser                       MIT
+Fastify, @fastify/static,
+  @fastify/websocket         MIT
+Zod                          MIT
+@anthropic-ai/sdk            MIT
+@modelcontextprotocol/sdk    MIT
+unpdf                        MIT (bundles PDF.js, Apache-2.0)
+@fontsource/pixelify-sans    Pixelify Sans font, SIL Open Font License 1.1
+Vite, TypeScript, tsx        MIT / Apache-2.0
+
+-------------------------------------------------------------------------------
+Not included
+-------------------------------------------------------------------------------
+
+No third-party image assets are included. The scripts in scripts/ can build
+local art packs from Star Office UI or from LimeZu's "Modern Interiors" and
+"Modern Office" that you obtained yourself; those licences forbid
+redistribution, so the results are written to packs/local/, which is ignored by
+git and excluded from Docker images.

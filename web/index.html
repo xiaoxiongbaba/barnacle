@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#12151d" />
+    <title>Barnacle</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/ui.css" />
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="ui" class="ui-root has-sidebar has-feed">
+      <header class="ui-topbar" role="banner">
+        <div class="ui-topbar__left">
+          <button id="toggle-sidebar" class="ui-icon-btn" type="button" aria-pressed="true" data-i18n-title="ui.sidebar" data-icon="sidebar"></button>
+          <div class="ui-brand">
+            <span id="brand-mark" class="ui-brand__mark"></span>
+            <div class="ui-brand__text">
+              <h1 id="office-name" class="ui-brand__name">Barnacle</h1>
+              <div class="ui-topbar__status">
+                <span id="conn" class="ui-pill is-connecting"><span class="ui-pill__dot"></span><span class="ui-pill__text" data-i18n="conn.connecting">connecting…</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="counters" class="ui-counters" role="group"></div>
+        <div class="ui-topbar__right">
+          <label class="ui-lang">
+            <span class="visually-hidden" data-i18n="lang.label">Language</span>
+            <select id="lang-select"></select>
+          </label>
+          <div id="camera-tools" class="ui-btn-group" hidden>
+            <button id="zoom-fit" class="ui-icon-btn" type="button" data-i18n-title="floor.fit" data-icon="overview"></button>
+            <button id="zoom-out" class="ui-icon-btn" type="button" data-i18n-title="floor.zoomOut" data-icon="zoomOut"></button>
+            <button id="zoom-in" class="ui-icon-btn" type="button" data-i18n-title="floor.zoomIn" data-icon="zoomIn"></button>
+          </div>
+          <div class="ui-btn-group">
+            <button id="edit-floor" class="ui-icon-btn" type="button" data-i18n-title="floor.edit" data-icon="pencil" hidden></button>
+            <span class="ui-badge-wrap">
+              <button id="open-results" class="ui-icon-btn" type="button" data-i18n-title="results.open" data-icon="delivery"></button>
+              <span id="results-badge" class="ui-badge" hidden></span>
+            </span>
+            <button id="toggle-feed" class="ui-icon-btn" type="button" aria-pressed="true" data-i18n-title="ui.feed" data-icon="feed"></button>
+            <button id="open-settings" class="ui-icon-btn" type="button" data-i18n-title="settings.open" data-icon="settings"></button>
+          </div>
+        </div>
+      </header>
+
+      <aside id="sidebar" class="ui-panel ui-sidebar">
+        <div class="ui-side__head">
+          <div class="ui-side__title">
+            <h2 data-i18n="ui.office">Office</h2>
+            <button id="sidebar-close" class="ui-icon-btn ui-icon-btn--sm ui-side__close" type="button" data-i18n-title="settings.close" data-icon="close"></button>
+          </div>
+          <label class="ui-search">
+            <span class="ui-search__icon" data-icon="search"></span>
+            <input id="search" class="ui-search__input" type="search" autocomplete="off" data-i18n-placeholder="ui.search" />
+            <kbd class="ui-kbd">/</kbd>
+          </label>
+        </div>
+        <div class="ui-side__scroll">
+          <div id="projects" class="ui-projects"></div>
+          <div id="rooms" class="ui-rooms" role="list"></div>
+          <div id="empty" class="ui-side__empty" hidden>
+            <p data-i18n="panel.empty">Nobody is here yet.</p>
+            <p class="ui-faint" data-i18n="panel.emptyHint"></p>
+          </div>
+        </div>
+      </aside>
+
+      <section id="feed" class="ui-panel ui-feed">
+        <div class="ui-feed__head">
+          <button id="feed-title" class="ui-feed__title" type="button">
+            <h2 data-i18n="ui.activity">Activity</h2>
+            <span id="feed-ticker" class="ui-feed__ticker"></span>
+          </button>
+          <button id="feed-collapse" class="ui-icon-btn ui-icon-btn--sm" type="button" aria-expanded="true" data-i18n-title="ui.feed"></button>
+        </div>
+        <div class="ui-feed__scroll">
+          <ol id="events" class="ui-feed__list" role="log"></ol>
+          <p id="feed-empty" class="ui-feed__empty" data-i18n="ui.feedEmpty" hidden></p>
+        </div>
+      </section>
+
+      <aside id="drawer" class="ui-panel ui-drawer" aria-hidden="true" inert>
+        <div class="ui-drawer__bar">
+          <span id="drawer-kind" class="ui-drawer__kind"></span>
+          <button id="drawer-close" class="ui-icon-btn" type="button" data-i18n-title="settings.close"></button>
+        </div>
+        <div id="drawer-body" class="ui-drawer__body"></div>
+      </aside>
+
+      <div id="scrim" class="ui-scrim"></div>
+      <div id="toasts" class="ui-toasts" aria-live="polite"></div>
+      <a id="credit" class="ui-credit" target="_blank" rel="noopener" hidden></a>
+    </div>
+
+    <dialog id="wizard" class="ui-results ui-root ui-wizdialog">
+      <div class="ui-results__frame">
+        <header class="ui-results__bar">
+          <h2 class="ui-results__name" data-i18n="wiz.title">Start an AI company</h2>
+          <button id="wizard-close" class="ui-icon-btn" type="button" data-i18n-title="settings.close" data-icon="close"></button>
+        </header>
+        <div class="ui-wiz__body"></div>
+      </div>
+    </dialog>
+    <dialog id="hq" class="ui-results ui-root ui-hqdialog">
+      <div class="ui-results__frame">
+        <header class="ui-results__bar">
+          <h2 class="ui-results__name" data-i18n="hq.title">Chairman's desk</h2>
+          <button id="hq-close" class="ui-icon-btn" type="button" data-i18n-title="settings.close" data-icon="close"></button>
+        </header>
+        <div class="ui-hq__body"></div>
+      </div>
+    </dialog>
+    <dialog id="results" class="ui-results ui-root">
+      <div class="ui-results__frame">
+        <header class="ui-results__bar">
+          <h2 class="ui-results__name" data-i18n="results.title">Results</h2>
+          <button id="results-close" class="ui-icon-btn" type="button" data-i18n-title="settings.close" data-icon="close"></button>
+        </header>
+        <div class="ui-results__body"></div>
+      </div>
+    </dialog>
+    <dialog id="settings" class="settings">
+      <header class="settings__header">
+        <h2 data-i18n="settings.title">Settings</h2>
+        <div>
+          <button id="lock" class="text-button" type="button" data-i18n="unlock.lock" hidden>Lock</button>
+          <button id="close-settings" class="icon-button" type="button" data-i18n-title="settings.close" title="Close">✕</button>
+        </div>
+      </header>
+
+      <form id="unlock-form" class="settings__unlock">
+        <h3 data-i18n="unlock.title">Unlock settings</h3>
+        <p class="help" data-i18n="unlock.help"></p>
+        <input id="unlock-token" type="password" autocomplete="off" data-i18n-placeholder="unlock.placeholder" required />
+        <label class="checkbox"><input id="unlock-remember" type="checkbox" /> <span data-i18n="unlock.remember"></span></label>
+        <p id="unlock-error" class="error" role="alert" hidden data-i18n="unlock.invalid"></p>
+        <button class="primary" type="submit" data-i18n="unlock.button">Unlock</button>
+      </form>
+
+      <div id="settings-body" class="settings__body" hidden>
+        <nav class="tabs" role="tablist">
+          <button type="button" role="tab" data-tab="general" data-i18n="tab.general" aria-selected="true">General</button>
+          <button type="button" role="tab" data-tab="floor" data-i18n="tab.floor">Floor plan</button>
+          <button type="button" role="tab" data-tab="occupants" data-i18n="tab.occupants">Occupants</button>
+          <button type="button" role="tab" data-tab="skills" data-i18n="tab.skills">Skills</button>
+          <button type="button" role="tab" data-tab="experience" data-i18n="tab.experience">Experience</button>
+          <button type="button" role="tab" data-tab="knowledge" data-i18n="tab.knowledge">Knowledge base</button>
+          <button type="button" role="tab" data-tab="policy" data-i18n="tab.policy">Permissions</button>
+          <button type="button" role="tab" data-tab="org" data-i18n="tab.org">Organization</button>
+          <button type="button" role="tab" data-tab="costs" data-i18n="tab.costs">Costs</button>
+          <button type="button" role="tab" data-tab="mcp" data-i18n="tab.mcp">MCP tools</button>
+          <button type="button" role="tab" data-tab="models" data-i18n="tab.models">AI models</button>
+          <button type="button" role="tab" data-tab="connect" data-i18n="tab.connect">Connect agents</button>
+          <button type="button" role="tab" data-tab="security" data-i18n="tab.security">Security</button>
+        </nav>
+
+        <form id="tab-general" class="tab" data-panel="general">
+          <div class="row">
+            <button id="open-wizard" class="primary small" type="button" data-i18n="wiz.open">Start a company</button>
+          </div>
+          <label>
+            <span data-i18n="general.officeName"></span>
+            <input name="officeName" type="text" maxlength="60" required />
+          </label>
+          <label>
+            <span data-i18n="general.language"></span>
+            <select name="language"></select>
+            <small class="help" data-i18n="general.languageHelp"></small>
+          </label>
+          <label>
+            <span data-i18n="general.scene"></span>
+            <select name="scene">
+              <option value="floor" data-i18n="scene.floor">Floor plan</option>
+              <option value="pack" data-i18n="scene.pack">Classic picture pack</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="general.floorArt"></span>
+            <select name="floorArt">
+              <option value="builtin" data-i18n="floorArt.builtin">Built-in pixel art</option>
+              <option value="pack" data-i18n="floorArt.pack">Installed art pack</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="general.pack"></span>
+            <select name="pack"></select>
+          </label>
+          <label>
+            <span data-i18n="general.ttl"></span>
+            <input name="stateTtlSeconds" type="number" min="30" max="86400" required />
+          </label>
+          <label>
+            <span data-i18n="general.offline"></span>
+            <input name="offlineAfterSeconds" type="number" min="60" max="604800" required />
+          </label>
+          <div class="row">
+            <button class="primary" type="submit" data-i18n="general.save">Save</button>
+            <span id="general-status" class="status" role="status"></span>
+          </div>
+        </form>
+
+        <section id="tab-floor" class="tab" data-panel="floor" hidden></section>
+
+        <section class="tab" data-panel="occupants" hidden>
+          <details id="new-agent" class="subform">
+            <summary data-i18n="occupants.new">New AI character</summary>
+            <form id="new-agent-form" class="subform__body">
+              <label><span data-i18n="occupants.newName"></span><input name="name" type="text" maxlength="40" required /></label>
+              <label><span data-i18n="occupants.newId"></span><input name="id" type="text" maxlength="40" pattern="[a-z0-9][a-z0-9_-]{0,39}" required /></label>
+              <div class="brain-fields"></div>
+              <div class="row">
+                <button class="primary" type="submit" data-i18n="occupants.create">Create</button>
+                <span class="status" role="status"></span>
+              </div>
+            </form>
+          </details>
+          <ul id="manage-occupants" class="manage-list"></ul>
+        </section>
+
+        <section id="tab-skills" class="tab" data-panel="skills" hidden></section>
+        <section id="tab-experience" class="tab" data-panel="experience" hidden></section>
+        <section id="tab-knowledge" class="tab" data-panel="knowledge" hidden></section>
+        <section id="tab-costs" class="tab" data-panel="costs" hidden></section>
+        <section id="tab-mcp" class="tab" data-panel="mcp" hidden></section>
+        <section id="tab-policy" class="tab" data-panel="policy" hidden></section>
+        <section id="tab-org" class="tab" data-panel="org" hidden></section>
+
+        <section class="tab" data-panel="models" hidden>
+          <p class="help" data-i18n="models.intro"></p>
+          <ul id="provider-list" class="manage-list"></ul>
+          <div class="row">
+            <button id="add-provider" type="button" data-i18n="models.add">Add provider</button>
+          </div>
+          <form id="provider-form" class="subform subform__body" hidden>
+            <label><span data-i18n="models.preset"></span><select name="preset"></select></label>
+            <label><span data-i18n="models.name"></span><input name="name" type="text" maxlength="60" required /></label>
+            <label>
+              <span data-i18n="models.kind"></span>
+              <select name="kind">
+                <option value="openai">OpenAI-compatible</option>
+                <option value="anthropic">Anthropic</option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="models.baseUrl"></span>
+              <input name="baseUrl" type="url" placeholder="https://…" />
+              <small class="help" data-i18n="models.baseUrlHelp"></small>
+            </label>
+            <label>
+              <span data-i18n="models.apiKey"></span>
+              <input name="apiKey" type="password" autocomplete="off" />
+              <small class="help" id="api-key-help"></small>
+            </label>
+            <div class="row">
+              <button class="primary" type="submit" data-i18n="general.save">Save</button>
+              <button id="cancel-provider" type="button" data-i18n="common.cancel">Cancel</button>
+              <span id="provider-status" class="status" role="status"></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="tab" data-panel="connect" hidden>
+          <p class="help" data-i18n="connect.intro"></p>
+          <div class="row">
+            <button id="toggle-token" class="text-button" type="button" data-i18n="connect.showToken">Show token</button>
+          </div>
+          <h3 data-i18n="connect.curl"></h3>
+          <div class="snippet"><pre id="snippet-curl"></pre><button class="copy" type="button" data-copy="curl" data-i18n="connect.copy">Copy</button></div>
+          <h3 data-i18n="connect.claude"></h3>
+          <p class="help" data-i18n="connect.claudeStep1"></p>
+          <div class="snippet"><pre id="snippet-hook"></pre><button class="copy" type="button" data-copy="hook" data-i18n="connect.copy">Copy</button></div>
+          <p class="help" data-i18n="connect.claudeStep2"></p>
+          <div class="snippet"><pre id="snippet-claude"></pre><button class="copy" type="button" data-copy="claude" data-i18n="connect.copy">Copy</button></div>
+        </section>
+
+        <section class="tab" data-panel="security" hidden>
+          <h3 data-i18n="security.rotate"></h3>
+          <p class="help" data-i18n="security.rotateHelp"></p>
+          <div class="row">
+            <button id="rotate-token" class="danger" type="button" data-i18n="security.rotateButton">Rotate token</button>
+            <span id="security-status" class="status" role="status"></span>
+          </div>
+          <p class="help" data-i18n="security.viewing"></p>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="chat" class="settings chat">
+      <header class="settings__header">
+        <div class="chat__heading">
+          <h2 id="chat-title">Chat</h2>
+          <small id="chat-model" class="help"></small>
+        </div>
+        <div>
+          <button id="chat-clear" class="text-button" type="button" data-i18n="chat.clear">Clear history</button>
+          <button id="chat-close" class="icon-button" type="button" data-i18n-title="settings.close" title="Close">✕</button>
+        </div>
+      </header>
+      <ol id="chat-log" class="chat-log" aria-live="polite"></ol>
+      <p id="chat-error" class="error chat__error" role="alert" hidden></p>
+      <form id="chat-form" class="chat-form">
+        <textarea id="chat-input" rows="2" maxlength="8000" data-i18n-placeholder="chat.placeholder" required></textarea>
+        <button class="primary" type="submit" data-i18n="chat.send">Send</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

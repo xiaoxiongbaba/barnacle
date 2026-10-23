@@ -1,0 +1,17 @@
+node_modules/
+dist/
+data/
+*.log
+.DS_Store
+packs/local/
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+master.key
+secret.json
+.vscode/
+.idea/
+coverage/

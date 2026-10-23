@@ -1,0 +1,806 @@
+:root {
+  /* Colours follow Habblaud's UI (see ui.css); the dialogs use them too. */
+  --bg: #12151d;
+  --panel: #161a24;
+  --line: rgba(160, 176, 210, 0.16);
+  --text: #e8ecf5;
+  --muted: #9aa4b8;
+  --accent: #7cc8ff;
+  --idle: #8b98b3;
+  --writing: #4fd18b;
+  --researching: #4fd18b;
+  --executing: #4fd18b;
+  --syncing: #3cd8d2;
+  --waiting: #ffb547;
+  --error: #ff6b6b;
+  --offline: #6b7280;
+  font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Class display rules must not override the hidden attribute. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+dialog h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+select,
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="url"] {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+select:focus-visible,
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: 6px 12px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.text-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  padding: 4px 6px;
+}
+
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0f1520;
+  font-weight: 600;
+}
+
+.danger {
+  border-color: color-mix(in srgb, var(--error) 60%, transparent);
+  color: var(--error);
+}
+
+.small {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- settings dialog */
+
+.settings {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.settings::backdrop {
+  background: rgba(8, 8, 12, 0.6);
+}
+
+.settings__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+}
+
+.settings__header h2 {
+  margin: 0;
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.settings__header > div {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings__unlock,
+.tab {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.settings h3 {
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tabs button[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--idle);
+}
+
+.tab label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.help {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--error);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status {
+  font-size: 12px;
+}
+
+.status--ok {
+  color: var(--writing);
+}
+
+.status--error {
+  color: var(--error);
+}
+
+.manage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.manage-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.manage-list li > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.snippet {
+  position: relative;
+}
+
+.snippet pre {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 72px 10px 10px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.snippet .copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+/* Long snippets must scroll inside their box instead of widening the dialog. */
+.settings {
+  overflow-x: hidden;
+}
+
+.tab > *,
+.settings__unlock > * {
+  min-width: 0;
+}
+
+.snippet pre {
+  max-height: 240px;
+  overflow: auto;
+}
+
+/* ---------------------------------------------------------------- AI models, brains, chat */
+
+.occupant .model-tag,
+textarea {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  resize: vertical;
+}
+
+.subform {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.subform summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.subform__body {
+  display: grid;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.subform__body > *,
+.brain-fields,
+.brain-fields > * {
+  min-width: 0;
+}
+
+.subform__body label,
+.brain-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.brain-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.brain-fields .row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.manage-list .occupant-item {
+  display: grid;
+  gap: 8px;
+}
+
+.occupant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.occupant-info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.brain-editor {
+  border-left: 2px solid var(--line);
+  padding: 4px 0 4px 12px;
+}
+
+.brain-editor > div:first-child {
+  display: grid;
+  gap: 10px;
+}
+
+.brain-editor label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.chat {
+  display: none;
+  width: min(560px, calc(100vw - 32px));
+  height: min(640px, calc(100vh - 32px));
+}
+
+.chat[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat__heading {
+  display: grid;
+  min-width: 0;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-msg {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-msg--user {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--idle) 22%, var(--panel));
+}
+
+.chat-msg--assistant {
+  align-self: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.chat-msg--pending {
+  color: var(--muted);
+}
+
+.chat-hint {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  margin: auto 0;
+}
+
+.chat__error {
+  padding: 0 16px;
+}
+
+.chat-form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.chat-form textarea {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------------- floor plan */
+
+.route-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.route-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.route-table td {
+  padding: 3px 8px 3px 0;
+}
+
+.route-table select {
+  width: 100%;
+}
+
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 10px 0 2px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+
+.inline-label {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+}
+
+.inline-label select {
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- map editor */
+
+.map-editor {
+  position: fixed;
+  top: calc(64px + 10px);
+  left: 10px;
+  bottom: 10px;
+  width: 304px;
+  max-width: calc(100% - 20px);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(18, 21, 29, 0.9);
+  backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: 0 12px 32px rgba(5, 7, 12, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.me-tools {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.me-tools button {
+  padding: 6px 4px;
+  font-size: 12px;
+}
+
+.me-hint,
+.me-keys {
+  margin: 0;
+  font-size: 11px;
+}
+
+.me-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.me-body h4 {
+  margin: 4px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.me-mode {
+  display: flex;
+  gap: 4px;
+}
+
+.me-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 4px;
+}
+
+.me-part {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.me-part canvas {
+  image-rendering: pixelated;
+  width: 44px;
+  height: 44px;
+}
+
+.me-part.selected {
+  border-color: var(--writing);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--writing) 50%, transparent);
+}
+
+.me-none {
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.me-room {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.me-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.me-actions button {
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------- souls and skills (settings) */
+
+.role-tag {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: rgba(255, 181, 71, 0.14);
+  color: #ffe2b0;
+  font-size: 11px;
+}
+
+.skill-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+}
+
+.skill-check {
+  align-items: flex-start;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.skill-check span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.skill-check small {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+textarea.mono {
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Knowledge base (Settings) */
+.kb-upload {
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.kb-group h4 {
+  margin: 16px 0 6px;
+}
+
+.kb-preview {
+  max-height: 260px;
+  overflow: auto;
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.kb-search {
+  gap: 8px;
+}
+
+.kb-search input {
+  flex: 1;
+}
+
+.kb-hits {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kb-snippet {
+  margin: 2px 0 0;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* Costs (Settings) */
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0 10px;
+  font-size: 13px;
+}
+
+.cost-table th,
+.cost-table td {
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.cost-table th {
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.cost-table input {
+  width: 100%;
+  min-width: 70px;
+}
+
+.cost-light {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cost-light .check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cost-builtin {
+  margin: 8px 0;
+}
+
+.cost-save {
+  margin-top: 12px;
+}
+
+/* MCP (Settings) */
+.mcp-tools {
+  margin: 6px 0 0 4px;
+}
+
+.mcp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(160, 176, 210, 0.2);
+}
+
+.mcp-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mcp-form label.check,
+.mcp-who label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.mcp-presets {
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.mcp-who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.mcp-who legend {
+  width: 100%;
+  margin-bottom: 4px;
+}
