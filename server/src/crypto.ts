@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHmac, randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { config } from "./config.js";
@@ -31,4 +31,9 @@ export function decrypt(sealed: string): string {
   const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "base64"));
   decipher.setAuthTag(Buffer.from(tag, "base64"));
   return Buffer.concat([decipher.update(Buffer.from(data, "base64")), decipher.final()]).toString("utf8");
+}
+
+/** A keyed signature (HMAC-SHA256, base64url) of `data`, e.g. for viewer cookies. */
+export function sign(data: string): string {
+  return createHmac("sha256", key).update(data).digest("base64url");
 }

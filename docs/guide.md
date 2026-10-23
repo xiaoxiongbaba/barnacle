@@ -76,6 +76,10 @@ Click the gear in the top-right corner and enter the office token. From there yo
 - remove occupants
 - copy ready-made snippets (curl, Claude Code hook + settings) that already contain this office's address and token
 - rotate the token
+- set a **view password** (Security): with it on, the page asks for it before
+  showing anything, and the office's data and live updates need it (or the
+  token). Viewers stay signed in for 30 days and can't change anything; you can
+  change the password, turn it off, or sign every viewer out
 
 The page is available in **English, 日本語 and 繁體中文**. Each viewer can switch
 language in the top bar; the office default applies to viewers who have not chosen.

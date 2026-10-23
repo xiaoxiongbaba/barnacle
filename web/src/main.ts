@@ -1,3 +1,4 @@
+import { ensureView } from "./view-gate";
 import "@fontsource/pixelify-sans/500.css";
 import "@fontsource/pixelify-sans/600.css";
 import Phaser from "phaser";
@@ -403,4 +404,4 @@ function handle(msg: ServerMessage) {
   render();
 }
 
-connect(handle, (up) => panel.setConnected(up));
+connect(handle, (up) => panel.setConnected(up), ensureView);

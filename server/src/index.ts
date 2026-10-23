@@ -13,6 +13,7 @@ import { chairs, ensureDesks, moveDesk, roomAt } from "./desks.js";
 import { Library } from "./library.js";
 import { Costs } from "./costs.js";
 import { Mcp } from "./mcp.js";
+import { Viewers } from "./viewers.js";
 import { registerMcpRoutes } from "./routes-mcp.js";
 import { registerCostRoutes } from "./routes-costs.js";
 import { registerFileRoutes } from "./routes-files.js";
@@ -141,6 +142,16 @@ function parseId(raw: unknown, reply: FastifyReply): string | undefined {
 }
 
 const issues = (error: z.ZodError) => error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+
+// A password to view the office (Settings → Security): its gate runs before every route below.
+new Viewers({
+  store,
+  hasToken,
+  requireToken,
+  dropViewers: () => {
+    for (const socket of clients) socket.close(4001, "sign in again");
+  },
+}).register(app);
 
 await app.register(fastifyWebsocket);
 

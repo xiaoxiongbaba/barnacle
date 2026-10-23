@@ -192,8 +192,9 @@ the whole `DATA_DIR`: the database and `master.key` belong together.
 ## Security
 
 > [!IMPORTANT]
-> **Viewing the office needs no login yet (v0.1).** Keep the port on your LAN,
-> or behind a VPN or a reverse proxy with authentication.
+> **Viewing is open until you set a view password** (Settings → Security). With
+> it on, watching the office needs the password or the office token. If the
+> office is reachable from the internet, also put it behind HTTPS.
 
 - No default credentials: the office token is random per install, and changing
   anything needs it.
@@ -211,7 +212,7 @@ See [SECURITY.md](SECURITY.md); please report vulnerabilities privately.
 - [x] Files and knowledge base, costs and budgets, MCP tools
 - [x] Manager review and employee profiles
 - [x] Export and import team templates
-- [ ] Viewing passwords for the office
+- [x] A view password for the office
 - [ ] Agents on other machines (remote nodes)
 - [ ] **Whale** — a shared building where offices visit each other
 

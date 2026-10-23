@@ -813,3 +813,37 @@ textarea.mono {
   white-space: nowrap;
   font-size: 12px;
 }
+
+/* View password */
+.view-password {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(160, 176, 210, 0.2);
+}
+
+.view-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.view-fields input {
+  flex: 1;
+  min-width: 160px;
+}
+
+dialog.view-gate {
+  max-width: 380px;
+}
+
+.view-gate__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.view-gate__form h2 {
+  margin: 0;
+}

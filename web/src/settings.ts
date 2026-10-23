@@ -1,3 +1,4 @@
+import { ViewPasswordPanel } from "./view-gate";
 import { McpTab } from "./mcp-ui";
 import { CostsTab } from "./costs-ui";
 import { KnowledgeTab } from "./files-ui";
@@ -100,6 +101,7 @@ export class SettingsDialog {
   private floorEditor: FloorEditor;
   private skillsTab = new SkillsTab($("tab-skills"), (status, fn) => this.guarded(status, fn));
   private experienceTab = new ExperienceTab($("tab-experience"), (status, fn) => this.guarded(status, fn), (id) => this.getOccupants().find((o) => o.id === id)?.name ?? id);
+  private viewPassword = new ViewPasswordPanel($("view-password"), (status, fn) => this.guarded(status, fn));
   private mcpTab = new McpTab($("tab-mcp"), (status, fn) => this.guarded(status, fn), () => this.getOccupants());
   private costsTab = new CostsTab($("tab-costs"), (status, fn) => this.guarded(status, fn));
   private knowledgeTab = new KnowledgeTab($("tab-knowledge"), (status, fn) => this.guarded(status, fn));
@@ -310,6 +312,7 @@ export class SettingsDialog {
     if (name === "knowledge") void this.knowledgeTab.render();
     if (name === "costs") void this.costsTab.render();
     if (name === "mcp") void this.mcpTab.render();
+    if (name === "security") void this.viewPassword.render();
     if (name === "org") void this.orgTab.render();
   }
 
